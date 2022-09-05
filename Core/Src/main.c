@@ -1,33 +1,39 @@
+/**
+ * @file main.c
+ * @author Sidharth (sidharth.prabukumar@gmail.com)
+ * @brief Main application file
+ * @date 2022-09-05
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include "main.h"
+#include "rtc.h"
 
 I2C_HandleTypeDef hi2c1;
-
-RTC_HandleTypeDef hrtc;
 
 UART_HandleTypeDef huart1;
 
 void SystemClock_Config(void);
 static void GPIO_Init(void);
 static void I2C1_Init(void);
-static void RTC_Init(void);
 static void USART1_UART_Init(void);
 static void Error_Handler(void);
 
 void printmsg(char *format,...)
- {
-	char str[80];
-
-	/*Extract the the argument list using VA apis */
-	va_list args;
-	va_start(args, format);
-	vsprintf(str, format,args);
-	HAL_UART_Transmit(&huart1,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
-	va_end(args);
- }
+{
+  char str[80];
+  /*Extract the the argument list using VA apis */
+  va_list args;
+  va_start(args, format);
+  vsprintf(str, format,args);
+  HAL_UART_Transmit(&huart1,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
+  va_end(args);
+}
 
 /**
   * @brief  The application entry point.
@@ -48,17 +54,20 @@ int main(void)
   USART1_UART_Init();
 
   printmsg("Testing UART...\r\n");
+  printmsg("Day is %s...\r\n", RTC_GetDayString());
 
   /* Infinite loop */
   while (1)
   {
 
   }
+  return 0;
 }
 
-/**
-  * @brief System Clock Configuration ofr 50 MHz using HSE
-  * @retval None
+ /**
+  * @brief Configure the system clock
+  * This function configures the System Clock 50 MHz using HSE
+  * as the clock source
   */
 void SystemClock_Config(void)
 {
@@ -135,51 +144,6 @@ static void I2C1_Init(void)
   }
 }
 
-/**
-  * @brief RTC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void RTC_Init(void)
-{
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef sDate = {0};
-
-  /** Initialize RTC Only
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 127;
-  hrtc.Init.SynchPrediv = 255;
-  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Initialize RTC and set the Time and Date
-  */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-  sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 0x1;
-  sDate.Year = 0x0;
-
-  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
 
 /**
   * @brief USART1 Initialization Function
@@ -223,10 +187,6 @@ static void GPIO_Init(void)
 
 }
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 void Error_Handler(void)
 {
   __disable_irq();

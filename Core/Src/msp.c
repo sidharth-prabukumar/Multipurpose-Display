@@ -1,7 +1,17 @@
+/**
+ * @file msp.c
+ * @author Sidharth (sidharth.prabukumar@gmail.com)
+ * @brief Implement MSP Inits and Deinits here
+ * @date 2022-09-05
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "main.h"
 
-/**
-  * Initializes the Global MSP.
+ /**
+  * @brief Initializes the Global MSP.
+  * 
   */
 void HAL_MspInit(void)
 {
@@ -22,10 +32,9 @@ void HAL_MspInit(void)
 
 /**
 * @brief I2C MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hi2c: I2C handle pointer
-* @retval None
-*/
+ * 
+ * @param hi2c I2C handle pointer
+ */
 void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -50,11 +59,10 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
 }
 
 /**
-* @brief RTC MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hrtc: RTC handle pointer
-* @retval None
-*/
+ * @brief RTC MSP Initialization
+ * 
+ * @param hrtc RTC handle pointer
+ */
 void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
 {
 	RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -79,11 +87,10 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
 }
 
 /**
-* @brief UART MSP Initialization
-* This function configures the hardware resources used in this example
-* @param huart: UART handle pointer
-* @retval None
-*/
+ * @brief UART MSP Initialization
+ * 
+ * @param huart UART handle pointer
+ */
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
