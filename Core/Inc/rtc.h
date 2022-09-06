@@ -44,3 +44,19 @@ App_StatusTypeDef RTC_SetDateTime(RTC_TimeTypeDef * pTime, RTC_DateTypeDef * pDa
  * @return char* string of the day of the week
  */
 char* RTC_GetDayString();
+
+/**
+ * @brief Gets the date and returns it as a string
+ *  Format: dd/mm/yy
+ * @return char* string of the date
+ */
+char* RTC_GetDateString();
+
+/**
+ * @brief Gets the time and returns it as a string
+ *  Format: hh:mm:ss
+ * @return char* string of the time
+ */
+char* RTC_GetTimeString();
+
+

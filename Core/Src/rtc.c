@@ -11,6 +11,14 @@
 
 static RTC_HandleTypeDef  hrtc;
 
+/**
+ * @brief Local helper to convert the date and time
+ * number to a string.
+ * @param num number to convert
+ * @param buf Target string to store the conversion
+ */
+static void RTC_NumberToString(uint8_t num , char* buf);
+
 App_StatusTypeDef RTC_Init()
 {
     RTC_TimeTypeDef sTime = {0};
@@ -103,4 +111,61 @@ char* RTC_GetDayString()
     }
 	char * weekday[] = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 	return weekday[(sDate.WeekDay)-1];
+}
+
+char* RTC_GetDateString()
+{
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+    if(APP_OK != RTC_GetDateTime(&sTime, &sDate))
+    {
+        return "error";
+    }
+	static char buf[9];
+
+	buf[2]= '/';
+	buf[5]= '/';
+
+	RTC_NumberToString(sDate.Date,buf);
+	RTC_NumberToString(sDate.Month,&buf[3]);
+	RTC_NumberToString(sDate.Year,&buf[6]);
+
+	buf[8]= '\0';
+
+	return buf;
+}
+
+char* RTC_GetTimeString()
+{
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+    if(APP_OK != RTC_GetDateTime(&sTime, &sDate))
+    {
+        return "error";
+    }
+	static char buf[9];
+
+	buf[2]= ':';
+	buf[5]= ':';
+
+	RTC_NumberToString(sTime.Hours,buf);
+	RTC_NumberToString(sTime.Minutes,&buf[3]);
+	RTC_NumberToString(sTime.Seconds,&buf[6]);
+
+	buf[8] = '\0';
+
+	return buf;
+}
+
+
+static void RTC_NumberToString(uint8_t num , char* buf)
+{
+	if(num < 10){
+		buf[0] = '0';
+		buf[1] = num+48;
+	}else if(num >= 10 && num < 99)
+	{
+		buf[0] = (num/10) + 48;
+		buf[1]= (num % 10) + 48;
+	}
 }
