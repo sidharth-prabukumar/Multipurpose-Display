@@ -27,6 +27,7 @@
 #define LCD_CMD_4DL_1N_5X8F  	    0x20
 #define LCD_CMD_4DL_1N_5X11F  	    0x24
 #define LCD_CMD_DON_CURON_BLKOFF    0x0E
+#define LCD_CMD_DON_CUROFF_BLKOFF   0x0C
 #define LCD_CMD_DON_CURON_BLKON     0x0F
 #define LCD_CMD_INCADD              0x06 
 #define LCD_CMD_DISP_CLR            0x01 

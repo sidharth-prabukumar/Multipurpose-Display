@@ -96,13 +96,13 @@ int main(void)
 
   LCD_DisplayClear();
   LCD_ReturnHome();
-
-  PrintDateTimeOnLCD();
+  LCD_SendCommand(LCD_CMD_DON_CUROFF_BLKOFF);
 
   /* Infinite loop */
   while (1)
   {
-
+    PrintDateTimeOnLCD();
+    HAL_Delay(1000);
   }
   return 0;
 }
@@ -243,6 +243,7 @@ void PrintDateTimeOnLCD()
   char *am_pm;
   am_pm = (currTime.TimeFormat == RTC_HOURFORMAT12_AM) ? "AM" : "PM";
 
+  LCD_ReturnHome();
   LCD_PrintString(RTC_GetTimeString());
   LCD_PrintString(am_pm);
   LCD_PrintString(" ");
