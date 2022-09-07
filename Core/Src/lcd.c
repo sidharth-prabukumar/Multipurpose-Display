@@ -78,7 +78,7 @@ App_StatusTypeDef LCD_Init()
     LCD_SendCommand(LCD_CMD_4DL_2N_5x8F);
 
     // Display ON and cursor ON
-    LCD_SendCommand(LCD_CMD_DON_CURON);
+    LCD_SendCommand(LCD_CMD_DON_CURON_BLKOFF);
 
     // Display Clear
     LCD_DisplayClear();
@@ -149,16 +149,16 @@ void LCD_SetCursor(uint8_t row, uint8_t column)
     switch(row)
     {
         case 1:
-            LCD_SendCommand((0x00 + column));
+            LCD_SendCommand((0x80 + column));
             break;
         case 2:
-            LCD_SendCommand((0x40 + column));
+            LCD_SendCommand((0xC0 + column));
             break;
         case 3:
-            LCD_SendCommand((0x14 + column));
+            LCD_SendCommand((0x94 + column));
             break;
         case 4:
-            LCD_SendCommand((0x54 + column));
+            LCD_SendCommand((0xD4 + column));
             break;
         default:
             break;

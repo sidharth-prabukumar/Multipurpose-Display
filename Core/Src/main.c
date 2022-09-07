@@ -13,6 +13,9 @@
 #include <stdarg.h>
 #include "main.h"
 #include "rtc.h"
+#include "lcd.h"
+
+#define APP_DEBUG_UART
 
 I2C_HandleTypeDef hi2c1;
 
@@ -23,7 +26,9 @@ static void GPIO_Init(void);
 static void I2C1_Init(void);
 static void USART1_UART_Init(void);
 static void Error_Handler(void);
+static void PrintDateTimeOnLCD(void);
 
+#ifdef APP_DEBUG_UART
 void printmsg(char *format,...)
 {
   char str[80];
@@ -34,6 +39,7 @@ void printmsg(char *format,...)
   HAL_UART_Transmit(&huart1,(uint8_t *)str, strlen(str),HAL_MAX_DELAY);
   va_end(args);
 }
+#endif
 
 /**
   * @brief  The application entry point.
@@ -50,11 +56,48 @@ int main(void)
   /* Initialize all configured peripherals */
   GPIO_Init();
   I2C1_Init();
-  RTC_Init();
   USART1_UART_Init();
 
-  printmsg("Testing UART...\r\n");
+  // LCD init
+  if(APP_OK != LCD_Init())
+  {
+    Error_Handler();
+  }
+  LCD_DisplayClear();
+  LCD_ReturnHome();
+
+#ifdef APP_DEBUG_UART
+  printmsg("RTC on LCD Test...\r\n");
+#endif
+
+  RTC_TimeTypeDef currTime = {0};
+  RTC_DateTypeDef currDate = {0};
+  currTime.Hours = 8;
+  currTime.Minutes = 50;
+  currTime.Seconds = 00;
+  currTime.TimeFormat = RTC_HOURFORMAT12_PM;
+  
+	currDate.WeekDay = RTC_WEEKDAY_TUESDAY;
+	currDate.Month = RTC_MONTH_SEPTEMBER;
+	currDate.Date = 6;
+	currDate.Year = 22;
+
+  // RTC Init
+  if(APP_OK != RTC_Init(&currTime, &currDate, RTC_FORMAT_BIN))
+  {
+    Error_Handler();
+  }
+
+#ifdef APP_DEBUG_UART
   printmsg("Day is %s...\r\n", RTC_GetDayString());
+  printmsg("Current Time is : %s\r\n", RTC_GetTimeString());
+	printmsg("Current Date is (DD-MM-YY): %s\r\n", RTC_GetDateString());
+#endif
+
+  LCD_DisplayClear();
+  LCD_ReturnHome();
+
+  PrintDateTimeOnLCD();
 
   /* Infinite loop */
   while (1)
@@ -187,8 +230,37 @@ static void GPIO_Init(void)
 
 }
 
+void PrintDateTimeOnLCD()
+{
+  RTC_TimeTypeDef currTime = {0};
+  RTC_DateTypeDef currDate = {0};
+  memset(&currTime, 0, sizeof(currTime));
+  memset(&currDate, 0, sizeof(currDate));
+  if(APP_OK != RTC_GetDateTime(&currTime, &currDate))
+  {
+    Error_Handler();
+  }
+  char *am_pm;
+  am_pm = (currTime.TimeFormat == RTC_HOURFORMAT12_AM) ? "AM" : "PM";
+
+  LCD_PrintString(RTC_GetTimeString());
+  LCD_PrintString(am_pm);
+  LCD_PrintString(" ");
+  LCD_PrintString(RTC_GetDateString());
+	LCD_SetCursor(2, 1);
+  LCD_PrintString(RTC_GetDayString());
+}
+
+void HAL_SYSTICK_Callback()
+{/*
+  PrintDateTimeOnLCD()*/
+}
+
 void Error_Handler(void)
 {
+#ifdef APP_DEBUG_UART
+  printmsg("Error!!!\r\n");
+#endif
   __disable_irq();
   while (1)
   {

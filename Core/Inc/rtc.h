@@ -10,12 +10,16 @@
 #pragma once
 
 #include "main.h"
+
 /**
  * @brief RTC Initialization Function
  * 
+ * @param pTime Pointer to RTC_TimeTypeDef struct to init
+ * @param pDate Pointer to RTC_DateTypeDef struct to init
+ * @param Format Format of the data. Either RTC_FORMAT_BIN or RTC_FORMAT_BCD
  * @return App_StatusTypeDef APP_OK if successful. APP_ERROR otherwise
  */
-App_StatusTypeDef RTC_Init();
+App_StatusTypeDef RTC_Init(RTC_TimeTypeDef * pTime, RTC_DateTypeDef * pDate, uint32_t Format);
 
 /**
  * @brief RTC Date and Time getter
