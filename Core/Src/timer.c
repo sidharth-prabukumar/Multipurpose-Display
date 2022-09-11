@@ -3,9 +3,9 @@
  * @author Sidharth (sidharth.prabukumar@gmail.com)
  * @brief Source file of the timer interface
  * @date 2022-09-05
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include "timer.h"
@@ -18,7 +18,7 @@ App_StatusTypeDef Timer_Init()
 	timerLocalData.htimer6.Init.CounterMode = TIM_COUNTERMODE_UP;
 	timerLocalData.htimer6.Init.Prescaler = 83;
 	timerLocalData.htimer6.Init.Period = 59551 - 1;
-	if(HAL_OK != HAL_TIM_Base_Init(&timerLocalData.htimer6))
+	if (HAL_OK != HAL_TIM_Base_Init(&timerLocalData.htimer6))
 	{
 		return APP_ERROR;
 	}
@@ -27,7 +27,7 @@ App_StatusTypeDef Timer_Init()
 
 App_StatusTypeDef Timer_Start()
 {
-	if(HAL_OK != HAL_TIM_Base_Start_IT(&timerLocalData.htimer6))
+	if (HAL_OK != HAL_TIM_Base_Start_IT(&timerLocalData.htimer6))
 	{
 		return APP_ERROR;
 	}
@@ -36,7 +36,7 @@ App_StatusTypeDef Timer_Start()
 
 uint8_t Timer_HasTimerExpired()
 {
-	if(timerLocalData.hasTimerExpired)
+	if (timerLocalData.hasTimerExpired)
 	{
 		timerLocalData.hasTimerExpired = FALSE;
 		return TRUE;
