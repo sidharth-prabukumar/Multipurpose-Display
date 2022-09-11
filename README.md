@@ -12,4 +12,5 @@ For this project, the following hardware is used:
 2. A 20x4 LCD Screen for display
 3. Bosch BM280 Environmental Sensor for temperature
 
-![LCD Interface with STM32](https://user-images.githubusercontent.com/52084290/189553162-6f85da81-410b-4ed6-bb7d-38b975645741.png)
+<a align="left"> <img src="https://user-images.githubusercontent.com/52084290/189553162-6f85da81-410b-4ed6-bb7d-38b975645741.png" width="800"></a>
+
