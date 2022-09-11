@@ -14,6 +14,7 @@
 #include "main.h"
 #include "rtc.h"
 #include "lcd.h"
+#include "timer.h"
 
 #define APP_DEBUG_UART
 
@@ -55,8 +56,11 @@ int main(void)
   
   /* Initialize all configured peripherals */
   GPIO_Init();
+  Timer_Init();
   I2C1_Init();
   USART1_UART_Init();
+
+  Timer_Start();
 
   // LCD init
   if(APP_OK != LCD_Init())
@@ -72,15 +76,15 @@ int main(void)
 
   RTC_TimeTypeDef currTime = {0};
   RTC_DateTypeDef currDate = {0};
-  currTime.Hours = 8;
-  currTime.Minutes = 50;
+  currTime.Hours = 6;
+  currTime.Minutes = 24;
   currTime.Seconds = 00;
   currTime.TimeFormat = RTC_HOURFORMAT12_PM;
   
-	currDate.WeekDay = RTC_WEEKDAY_TUESDAY;
-	currDate.Month = RTC_MONTH_SEPTEMBER;
-	currDate.Date = 6;
-	currDate.Year = 22;
+  currDate.WeekDay = RTC_WEEKDAY_SUNDAY;
+  currDate.Month = RTC_MONTH_SEPTEMBER;
+  currDate.Date = 11;
+  currDate.Year = 22;
 
   // RTC Init
   if(APP_OK != RTC_Init(&currTime, &currDate, RTC_FORMAT_BIN))
@@ -101,8 +105,10 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
-    PrintDateTimeOnLCD();
-    HAL_Delay(1000);
+	if(Timer_HasTimerExpired())
+	{
+    	PrintDateTimeOnLCD();
+	}
   }
   return 0;
 }
@@ -252,10 +258,7 @@ void PrintDateTimeOnLCD()
   LCD_PrintString(RTC_GetDayString());
 }
 
-void HAL_SYSTICK_Callback()
-{/*
-  PrintDateTimeOnLCD()*/
-}
+
 
 void Error_Handler(void)
 {
