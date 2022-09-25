@@ -35,6 +35,8 @@ App_StatusTypeDef RTC_Init(RTC_TimeTypeDef *pTime, RTC_DateTypeDef *pDate, uint3
 		return APP_ERROR;
 	}
 
+    return APP_OK;
+
 	/** Initialize RTC and set the Time and Date
 	 */
 	return RTC_SetDateTime(pTime, pDate, Format);

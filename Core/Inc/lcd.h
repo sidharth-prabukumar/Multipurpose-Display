@@ -11,15 +11,19 @@
 
 #include "main.h"
 
-#define LCD_GPIO_PORT GPIOB
+#define LCD_GPIO_PORT_1 GPIOB
+#define LCD_GPIO_PORT_2 GPIOC
 
+/* GPIO Port B */
 #define LCD_GPIO_RS     GPIO_PIN_3
 #define LCD_GPIO_RW     GPIO_PIN_5
 #define LCD_GPIO_EN     GPIO_PIN_4
 #define LCD_GPIO_D4     GPIO_PIN_10
 #define LCD_GPIO_D5     GPIO_PIN_6
-#define LCD_GPIO_D6     GPIO_PIN_9
-#define LCD_GPIO_D7     GPIO_PIN_8
+
+/* GPIO Port C */
+#define LCD_GPIO_D6     GPIO_PIN_5
+#define LCD_GPIO_D7     GPIO_PIN_6
 
 /* LCD Commands */
 #define LCD_CMD_4DL_2N_5x8F         0x28
