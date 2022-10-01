@@ -18,16 +18,13 @@
 
 #define APP_DEBUG_UART
 
-I2C_HandleTypeDef hi2c1;
-
 UART_HandleTypeDef huart1;
 
 void SystemClock_Config(void);
 static void GPIO_Init(void);
-static void I2C1_Init(void);
 static void USART1_UART_Init(void);
-static void Error_Handler(void);
 static void PrintDateTimeOnLCD(void);
+static void Error_Handler(void);
 
 #ifdef APP_DEBUG_UART
 void printmsg(char *format, ...)
@@ -57,7 +54,6 @@ int main(void)
 	/* Initialize all configured peripherals */
 	GPIO_Init();
 	Timer_Init();
-	I2C1_Init();
 	USART1_UART_Init();
 
 	Timer_Start();
@@ -91,6 +87,8 @@ int main(void)
 	{
 		Error_Handler();
 	}
+
+	/* TODO: BMP280 Init */
 
 #ifdef APP_DEBUG_UART
 	printmsg("Day is %s...\r\n", RTC_GetDayString());
@@ -170,27 +168,6 @@ void SystemClock_Config(void)
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/**
- * @brief I2C1 Initialization Function
- * @param None
- * @retval None
- */
-static void I2C1_Init(void)
-{
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 100000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-}
 
 /**
  * @brief USART1 Initialization Function
@@ -231,6 +208,12 @@ static void GPIO_Init(void)
 
 	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 15, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	usrLED.Pin = GPIO_PIN_13;
+	usrLED.Mode = GPIO_MODE_INPUT;
+	usrLED.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &usrLED);
 }
 
 void PrintDateTimeOnLCD()
