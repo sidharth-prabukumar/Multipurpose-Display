@@ -25,10 +25,10 @@ App_StatusTypeDef BMP280_Init()
     uint8_t regVal = 0x00;
     memset(&bmp280, 0, sizeof(bmp280));
     bmp280.i2cAddress = BMP280_I2C_ADDRESS_0;
-    if(APP_OK != BMP280_I2C1_Init())
+    if (APP_OK != BMP280_I2C1_Init())
     {
         return APP_ERROR;
-    } 
+    }
 
     /* Read Device ID */
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CHIPID, 1, HAL_MAX_DELAY))
@@ -143,11 +143,11 @@ App_StatusTypeDef BMP280_SetConfig(bmp280_config_t *config)
 double BMP280_ReadTemperatureC()
 {
     uint8_t buf[3];
-	int32_t temp_adc = 0;
+    int32_t temp_adc = 0;
     double temperatureC;
-	int32_t var1 = 0;
-	int32_t var2 = 0;
-	int32_t t_fine;
+    int32_t var1 = 0;
+    int32_t var2 = 0;
+    int32_t t_fine;
 
     /* Read the temperature ADC registers */
     buf[0] = BMP280_REG_TEMPDATA;
@@ -220,19 +220,19 @@ static void UpdateCalibrationValues()
     bmp280.temp_calib.dig_T3 = (int16_t)((uint16_t)buf[0] << 8 | (uint16_t)buf[1]);
 }
 
-char * BMP280_GetTemperatureString()
+char *BMP280_GetTemperatureString()
 {
     static char buf[20];
     double temperatureC = BMP280_ReadTemperatureC();
     char *tmpSign = (temperatureC < 0) ? "-" : "";
-	float tmpVal = (temperatureC < 0) ? -temperatureC : temperatureC;
+    float tmpVal = (temperatureC < 0) ? -temperatureC : temperatureC;
 
-	int tmpInt1 = tmpVal;                  /* Get the integer */
-	float tmpFrac = tmpVal - tmpInt1;      /* Get fraction */
-	int tmpInt2 = trunc(tmpFrac * 1000);  /* Turn into integer */
+    int tmpInt1 = tmpVal;                /* Get the integer */
+    float tmpFrac = tmpVal - tmpInt1;    /* Get fraction */
+    int tmpInt2 = trunc(tmpFrac * 1000); /* Turn into integer */
 
-	/* Print as parts, Need 0-padding for fractional bit. */
-	sprintf ((char *)buf, "%s%d.%04d", tmpSign, tmpInt1, tmpInt2);
+    /* Print as parts, Need 0-padding for fractional bit. */
+    sprintf((char *)buf, "%s%d.%04d", tmpSign, tmpInt1, tmpInt2);
     return buf;
 }
 

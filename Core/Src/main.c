@@ -168,7 +168,6 @@ void SystemClock_Config(void)
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-
 /**
  * @brief USART1 Initialization Function
  * @param None
