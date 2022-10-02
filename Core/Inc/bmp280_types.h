@@ -22,7 +22,6 @@ enum
     BMP280_REG_DIG_T2 = 0x8A,
     BMP280_REG_DIG_T3 = 0x8C,
     BMP280_REG_CHIPID = 0xD0,
-    BMP280_REG_VERSION = 0xD1,
     BMP280_REG_SOFTRESET = 0xE0,
     BMP280_REG_STATUS = 0xF3,
     BMP280_REG_CONTROL = 0xF4,
@@ -30,13 +29,13 @@ enum
     BMP280_REG_TEMPDATA = 0xFA,
 };
 
-#define BMP280_CHIPID (0x58)        /* Default Chip ID */
+#define BMP280_CHIPID                   (0x58)      /* Default Chip ID */
 
 /**
  * @brief Sampling Rate register mask and shift
  */
 #define BMP280_SAMPLING_MASK            0xE0
-#define BMP280_SAMPLING_SHIFT          (5)
+#define BMP280_SAMPLING_SHIFT           (5)
 /**
  * @brief Sampling Rate
  */
@@ -51,7 +50,7 @@ enum
  * @brief Operating Mode register mask and shift
  */
 #define BMP280_MODE_MASK              0x03
-#define BMP280_MODE_SHIFT            (0)
+#define BMP280_MODE_SHIFT             (0)
 /** 
  * @brief Operating Mode 
  */
@@ -65,7 +64,7 @@ enum
  * @brief Filtering level register mask and shift
  */
 #define BMP280_FILTER_MASK              0x1C
-#define BMP280_FILTER_SHIFT            (2)
+#define BMP280_FILTER_SHIFT             (2)
 /**
  * @brief Filtering level
  */
@@ -79,7 +78,7 @@ enum
  * @brief Standby duration register mask and shift
  */
 #define BMP280_STANDBY_MASK             0xE0
-#define BMP280_STANDBY_SHIFT           (5)
+#define BMP280_STANDBY_SHIFT            (5)
 /**
  * @brief Standby duration in ms
  */ 

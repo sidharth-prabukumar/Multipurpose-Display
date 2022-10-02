@@ -23,6 +23,7 @@ static App_StatusTypeDef BMP280_I2C1_Init(void);
 App_StatusTypeDef BMP280_Init()
 {
     uint8_t regVal = 0x00;
+    uint8_t regAddr = 0x00;
     memset(&bmp280, 0, sizeof(bmp280));
     bmp280.i2cAddress = BMP280_I2C_ADDRESS_0;
     if (APP_OK != BMP280_I2C1_Init())
@@ -31,7 +32,8 @@ App_StatusTypeDef BMP280_Init()
     }
 
     /* Read Device ID */
-    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CHIPID, 1, HAL_MAX_DELAY))
+    regAddr = (uint8_t)BMP280_REG_CHIPID;
+    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, &regAddr, 1, HAL_MAX_DELAY))
     {
         return APP_ERROR;
     }
@@ -59,9 +61,11 @@ App_StatusTypeDef BMP280_GetConfig(bmp280_config_t *config)
         return APP_ERROR;
     }
     uint8_t regVal = 0x00;
+    uint8_t regAddr = 0x00;
 
     /* Read Config Register */
-    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CONFIG, 1, HAL_MAX_DELAY))
+    regAddr = (uint8_t)BMP280_REG_CONFIG;
+    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, &regAddr, 1, HAL_MAX_DELAY))
     {
         return APP_ERROR;
     }
@@ -73,7 +77,8 @@ App_StatusTypeDef BMP280_GetConfig(bmp280_config_t *config)
     config->filter = (regVal & BMP280_FILTER_MASK) >> BMP280_FILTER_SHIFT;
 
     /* Read Control Register */
-    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CONTROL, 1, HAL_MAX_DELAY))
+    regAddr = (uint8_t)BMP280_REG_CONTROL;
+    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, &regAddr, 1, HAL_MAX_DELAY))
     {
         return APP_ERROR;
     }
@@ -95,7 +100,8 @@ App_StatusTypeDef BMP280_SetConfig(bmp280_config_t *config)
     uint8_t regVal = 0x00;
     uint8_t buf[2];
     /* Read config register */
-    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CONFIG, 1, HAL_MAX_DELAY))
+    buf[0] = (uint8_t)BMP280_REG_CONTROL;
+    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return APP_ERROR;
     }
@@ -110,7 +116,7 @@ App_StatusTypeDef BMP280_SetConfig(bmp280_config_t *config)
     regVal |= ((config->filter << BMP280_FILTER_SHIFT) & BMP280_FILTER_MASK);
 
     /* Write to the Config register with the modified values */
-    buf[0] = BMP280_REG_CONFIG;
+    buf[0] = (uint8_t)BMP280_REG_CONFIG;
     buf[1] = regVal;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 2, HAL_MAX_DELAY))
     {
@@ -118,7 +124,8 @@ App_StatusTypeDef BMP280_SetConfig(bmp280_config_t *config)
     }
 
     /* Read control register */
-    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, (uint8_t *)BMP280_REG_CONTROL, 1, HAL_MAX_DELAY))
+    buf[0] = (uint8_t)BMP280_REG_CONTROL;
+    if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return APP_ERROR;
     }
@@ -131,7 +138,7 @@ App_StatusTypeDef BMP280_SetConfig(bmp280_config_t *config)
     /* Update the Sampling and Mode register values */
     regVal |= ((config->tempOversampling << BMP280_SAMPLING_SHIFT) & BMP280_SAMPLING_MASK);
     regVal |= ((config->mode << BMP280_MODE_SHIFT) & BMP280_MODE_MASK);
-    buf[0] = BMP280_REG_CONTROL;
+    buf[0] = (uint8_t)BMP280_REG_CONTROL;
     buf[1] = regVal;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 2, HAL_MAX_DELAY))
     {
@@ -150,7 +157,7 @@ double BMP280_ReadTemperatureC()
     int32_t t_fine;
 
     /* Read the temperature ADC registers */
-    buf[0] = BMP280_REG_TEMPDATA;
+    buf[0] = (uint8_t)BMP280_REG_TEMPDATA;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return -1;
@@ -177,6 +184,22 @@ double BMP280_ReadTemperatureC()
     return temperatureC;
 }
 
+char *BMP280_GetTemperatureString()
+{
+    static char buf[20];
+    double temperatureC = BMP280_ReadTemperatureC();
+    char *tmpSign = (temperatureC < 0) ? "-" : "";
+    float tmpVal = (temperatureC < 0) ? -temperatureC : temperatureC;
+
+    int tmpInt1 = tmpVal;               /* Get the integer */
+    float tmpFrac = tmpVal - tmpInt1;   /* Get fraction */
+    int tmpInt2 = trunc(tmpFrac * 100); /* Turn into integer */
+
+    /* Print as parts, Need 0-padding for fractional bit. */
+    sprintf((char *)buf, "%s%d.%02d", tmpSign, tmpInt1, tmpInt2);
+    return buf;
+}
+
 /**
  * @brief Read and store temperature calibration data
  */
@@ -184,7 +207,7 @@ static void UpdateCalibrationValues()
 {
     uint8_t buf[2];
     /* Read dig_T1(0x88/0x89) */
-    buf[0] = BMP280_REG_DIG_T1;
+    buf[0] = (uint8_t)BMP280_REG_DIG_T1;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return;
@@ -196,7 +219,7 @@ static void UpdateCalibrationValues()
     bmp280.temp_calib.dig_T1 = (uint16_t)buf[0] << 8 | (uint16_t)buf[1];
 
     /* Read dig_T2(0x8A/0x8B) */
-    buf[0] = BMP280_REG_DIG_T2;
+    buf[0] = (uint8_t)BMP280_REG_DIG_T2;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return;
@@ -208,7 +231,7 @@ static void UpdateCalibrationValues()
     bmp280.temp_calib.dig_T2 = (int16_t)((uint16_t)buf[0] << 8 | (uint16_t)buf[1]);
 
     /* Read dig_T3(0x8C/0x8D) */
-    buf[0] = BMP280_REG_DIG_T3;
+    buf[0] = (uint8_t)BMP280_REG_DIG_T3;
     if (HAL_OK != HAL_I2C_Master_Transmit(&hi2c1, bmp280.i2cAddress, buf, 1, HAL_MAX_DELAY))
     {
         return;
@@ -218,22 +241,6 @@ static void UpdateCalibrationValues()
         return;
     }
     bmp280.temp_calib.dig_T3 = (int16_t)((uint16_t)buf[0] << 8 | (uint16_t)buf[1]);
-}
-
-char *BMP280_GetTemperatureString()
-{
-    static char buf[20];
-    double temperatureC = BMP280_ReadTemperatureC();
-    char *tmpSign = (temperatureC < 0) ? "-" : "";
-    float tmpVal = (temperatureC < 0) ? -temperatureC : temperatureC;
-
-    int tmpInt1 = tmpVal;                /* Get the integer */
-    float tmpFrac = tmpVal - tmpInt1;    /* Get fraction */
-    int tmpInt2 = trunc(tmpFrac * 1000); /* Turn into integer */
-
-    /* Print as parts, Need 0-padding for fractional bit. */
-    sprintf((char *)buf, "%s%d.%04d", tmpSign, tmpInt1, tmpInt2);
-    return buf;
 }
 
 /**

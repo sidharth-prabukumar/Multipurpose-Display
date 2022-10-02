@@ -37,6 +37,9 @@
 #define LCD_CMD_DISP_CLR            0x01 
 #define LCD_CMD_DISP_RET_HOME       0x02 
 
+/* LCD Special Characters */
+#define LCD_DEGREES_CHAR_CODE       ((char)223)
+
 /**
  * @brief LCD Initialization Function
  * 

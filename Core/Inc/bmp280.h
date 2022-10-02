@@ -45,12 +45,39 @@ typedef struct
     double temperatureC;                /* Temperature in Celsius */
 }bmp280_t;
 
+/**
+ * @brief BMP280 Initialization
+ * 
+ * @return App_StatusTypeDef APP_OK if successful. APP_ERROR otherwise
+ */
 App_StatusTypeDef BMP280_Init();
 
+/**
+ * @brief Read bmp280_config_t and write it to the passed in pointer
+ * 
+ * @param config Pointer to bmp280_config_t to be populated
+ * @return App_StatusTypeDef APP_OK if successful. APP_ERROR otherwise
+ */
 App_StatusTypeDef BMP280_GetConfig(bmp280_config_t * config);
 
+/**
+ * @brief Set BMP280 config values with the one passed in
+ * 
+ * @param config Pointer to bmp280_config_t to set
+ * @return App_StatusTypeDef 
+ */
 App_StatusTypeDef BMP280_SetConfig(bmp280_config_t * config);
 
+/**
+ * @brief Read temperature and return as a Double
+ * 
+ * @return double Temperature in Celsius
+ */
 double BMP280_ReadTemperatureC();
 
+/**
+ * @brief Read temperature and return the value as a String
+ * 
+ * @return char* String pointer to the temperature value
+ */
 char * BMP280_GetTemperatureString();

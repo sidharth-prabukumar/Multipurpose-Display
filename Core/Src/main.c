@@ -15,10 +15,15 @@
 #include "rtc.h"
 #include "lcd.h"
 #include "timer.h"
+#include "bmp280.h"
+#include "bmp280_types.h"
 
 #define APP_DEBUG_UART
 
 UART_HandleTypeDef huart1;
+
+static char lcdRow1String[20];
+static char lcdRow2String[20];
 
 void SystemClock_Config(void);
 static void GPIO_Init(void);
@@ -88,12 +93,42 @@ int main(void)
 		Error_Handler();
 	}
 
-	/* TODO: BMP280 Init */
+	/* BMP280 Init */
+	if (APP_OK != BMP280_Init())
+	{
+		Error_Handler();
+	}
+
+	/* Set up the BMP280 Config Values */
+	bmp280_config_t bmp280_config;
+	bmp280_config.filter = BMP280_FILTER_X2;
+	bmp280_config.mode = BMP280_MODE_NORMAL;
+	bmp280_config.tempOversampling = BMP280_SAMPLING_X1;
+	bmp280_config.tStandby = BMP280_STANDBY_MS_500;
+	if (APP_OK != BMP280_SetConfig(&bmp280_config))
+	{
+		Error_Handler();
+	}
+	/* Confirm that the config values have been set corectly */
+	bmp280_config_t bmp280_read_config;
+	if (APP_OK != BMP280_GetConfig(&bmp280_read_config))
+	{
+		Error_Handler();
+	}
+	if (bmp280_config.filter != bmp280_read_config.filter ||
+		bmp280_config.mode != bmp280_read_config.mode ||
+		bmp280_config.tempOversampling != bmp280_read_config.tempOversampling ||
+		bmp280_config.tStandby != bmp280_read_config.tStandby)
+	{
+		printmsg("BMP280 Config values do not match\r\n");
+		Error_Handler();
+	}
 
 #ifdef APP_DEBUG_UART
 	printmsg("Day is %s...\r\n", RTC_GetDayString());
 	printmsg("Current Time is : %s\r\n", RTC_GetTimeString());
 	printmsg("Current Date is (DD-MM-YY): %s\r\n", RTC_GetDateString());
+	printmsg("Current Tempature = %s°C\r\n", BMP280_GetTemperatureString());
 #endif
 
 	LCD_DisplayClear();
@@ -228,13 +263,17 @@ void PrintDateTimeOnLCD()
 	char *am_pm;
 	am_pm = (currTime.TimeFormat == RTC_HOURFORMAT12_AM) ? "AM" : "PM";
 
+	/* Set Cursor to the beginning */
 	LCD_ReturnHome();
-	LCD_PrintString(RTC_GetTimeString());
-	LCD_PrintString(am_pm);
-	LCD_PrintString(" ");
-	LCD_PrintString(RTC_GetDateString());
+
+	/* Prepare the LCD Strings */
+	sprintf(lcdRow1String, "%s%s %s", RTC_GetTimeString(), am_pm, RTC_GetDateString());
+	sprintf(lcdRow2String, "%s %s%cC    ", RTC_GetDayString(), BMP280_GetTemperatureString(), LCD_DEGREES_CHAR_CODE);
+
+	/* Write to LCD */
+	LCD_PrintString(lcdRow1String);
 	LCD_SetCursor(2, 1);
-	LCD_PrintString(RTC_GetDayString());
+	LCD_PrintString(lcdRow2String);
 }
 
 void Error_Handler(void)
