@@ -107,8 +107,8 @@ char *RTC_GetDateString()
 	buf[2] = '/';
 	buf[5] = '/';
 
-	RTC_NumberToString(sDate.Date, buf);
-	RTC_NumberToString(sDate.Month, &buf[3]);
+	RTC_NumberToString(sDate.Month, buf);
+	RTC_NumberToString(sDate.Date, &buf[3]);
 	RTC_NumberToString(sDate.Year, &buf[6]);
 
 	buf[8] = '\0';
