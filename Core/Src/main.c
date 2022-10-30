@@ -66,7 +66,6 @@ int main(void)
 	GPIO_Init();
 	Timer_Init();
 	USART1_UART_Init();
-    SPI3_SPI_Init();
 
 	Timer_Start();
 
@@ -83,6 +82,8 @@ int main(void)
 #endif
 	
 	LCD_PrintString("Synchronizing...");
+	HAL_Delay(2500);
+    SPI3_SPI_Init();
 	time_t time;
 	if(APP_OK != GetTimeFromESP32(&time))
 	{
