@@ -8,9 +8,11 @@
  *
  */
 #include <stdio.h>
+#include <time.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <inttypes.h>
 #include "main.h"
 #include "rtc.h"
 #include "lcd.h"
@@ -18,9 +20,11 @@
 #include "bmp280.h"
 #include "bmp280_types.h"
 
-#define APP_DEBUG_UART
+/* Uncomment the following line to enable UART Debugging */
+//#define APP_DEBUG_UART
 
 UART_HandleTypeDef huart1;
+SPI_HandleTypeDef hspi3;
 
 static char lcdRow1String[20];
 static char lcdRow2String[20];
@@ -28,7 +32,9 @@ static char lcdRow2String[20];
 void SystemClock_Config(void);
 static void GPIO_Init(void);
 static void USART1_UART_Init(void);
+static void SPI3_SPI_Init(void);
 static void PrintDateTimeOnLCD(void);
+static App_StatusTypeDef GetTimeFromESP32(time_t *);
 static void Error_Handler(void);
 
 #ifdef APP_DEBUG_UART
@@ -60,6 +66,7 @@ int main(void)
 	GPIO_Init();
 	Timer_Init();
 	USART1_UART_Init();
+    SPI3_SPI_Init();
 
 	Timer_Start();
 
@@ -74,18 +81,40 @@ int main(void)
 #ifdef APP_DEBUG_UART
 	printmsg("RTC on LCD Test...\r\n");
 #endif
+	
+	LCD_PrintString("Synchronizing...");
+	time_t time;
+	if(APP_OK != GetTimeFromESP32(&time))
+	{
+		LCD_DisplayClear();
+		LCD_ReturnHome();
+		LCD_PrintString("Failed sync!");
+		Error_Handler();
+	}
+	struct tm *tp = gmtime(&time);
+	if(!tp)
+	{
+		Error_Handler();
+	}
+
+#ifdef APP_DEBUG_UART
+	char dayofweek[7][10] = {"Sunday",   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	printmsg("%02d/%02d/%04d %s %02d:%02d:%02d\r\n", tp->tm_mon+1, tp->tm_mday,
+			(1900 + tp->tm_year), dayofweek[tp->tm_wday], tp->tm_hour, tp->tm_min,
+			tp->tm_sec);
+#endif
 
 	RTC_TimeTypeDef currTime = {0};
 	RTC_DateTypeDef currDate = {0};
-	currTime.Hours = 6;
-	currTime.Minutes = 24;
-	currTime.Seconds = 00;
-	currTime.TimeFormat = RTC_HOURFORMAT12_PM;
 
-	currDate.WeekDay = RTC_WEEKDAY_SUNDAY;
-	currDate.Month = RTC_MONTH_SEPTEMBER;
-	currDate.Date = 11;
-	currDate.Year = 22;
+	currTime.Hours		= (uint8_t)(tp->tm_hour);
+	currTime.Minutes 	= (uint8_t)(tp->tm_min);
+	currTime.Seconds 	= (uint8_t)(tp->tm_sec);
+
+	currDate.WeekDay 	= (uint8_t)(tp->tm_wday + 1);	/* Weekday in tm goes from 0-6. RTC struct expects 1-7 */
+	currDate.Month 		= (uint8_t)(tp->tm_mon + 1);	/* Month in tm goes from 0-11. RTC struct expects 1-12 */
+	currDate.Date 		= (uint8_t)(tp->tm_mday);
+	currDate.Year 		= (uint8_t)(tp->tm_year - 100); /* (1900 + tp->tm_year - 2000) */
 
 	// RTC Init
 	if (APP_OK != RTC_Init(&currTime, &currDate, RTC_FORMAT_BIN))
@@ -120,7 +149,9 @@ int main(void)
 		bmp280_config.tempOversampling != bmp280_read_config.tempOversampling ||
 		bmp280_config.tStandby != bmp280_read_config.tStandby)
 	{
+#ifdef APP_DEBUG_UART
 		printmsg("BMP280 Config values do not match\r\n");
+#endif
 		Error_Handler();
 	}
 
@@ -225,6 +256,30 @@ static void USART1_UART_Init(void)
 }
 
 /**
+  * @brief SPI3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void SPI3_SPI_Init(void)
+{
+  hspi3.Instance = SPI3;
+  hspi3.Init.Mode = SPI_MODE_SLAVE;
+  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi3.Init.NSS = SPI_NSS_SOFT;
+  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi3.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
  * @brief GPIO Initialization Function
  * @param None
  * @retval None
@@ -260,20 +315,46 @@ void PrintDateTimeOnLCD()
 	{
 		Error_Handler();
 	}
-	char *am_pm;
-	am_pm = (currTime.TimeFormat == RTC_HOURFORMAT12_AM) ? "AM" : "PM";
 
 	/* Set Cursor to the beginning */
 	LCD_ReturnHome();
 
 	/* Prepare the LCD Strings */
-	sprintf(lcdRow1String, "%s%s %s", RTC_GetTimeString(), am_pm, RTC_GetDateString());
+	sprintf(lcdRow1String, "%s %s", RTC_GetTimeString(), RTC_GetDateString());
 	sprintf(lcdRow2String, "%s %s%cC    ", RTC_GetDayString(), BMP280_GetTemperatureString(), LCD_DEGREES_CHAR_CODE);
 
 	/* Write to LCD */
 	LCD_PrintString(lcdRow1String);
 	LCD_SetCursor(2, 1);
 	LCD_PrintString(lcdRow2String);
+}
+
+static App_StatusTypeDef GetTimeFromESP32(time_t * pTime)
+{
+#ifdef APP_DEBUG_UART
+	printmsg("Waiting for data via SPI...\r\n");
+#endif
+	char rx_buf[8];
+	uint64_t epochSecs = 0;
+	uint64_t * pEpochSecs = &epochSecs;
+	/**
+	 * @brief Wait for time sync...
+	 * Ensure that epoch is within the millennium (2022 - 3022) :)
+	 */
+	while (!((*pEpochSecs > 1640995200) && (*pEpochSecs < 33197904000)))
+	{
+		memset(rx_buf,0,8);
+		if(HAL_OK != HAL_SPI_Receive(&hspi3, (uint8_t *)rx_buf, 8, HAL_MAX_DELAY))
+		{
+			return APP_ERROR;
+		}
+		pEpochSecs = (uint64_t *)rx_buf;
+#ifdef APP_DEBUG_UART
+		printmsg("Received: %x\r\n", (uint32_t)*pEpochSecs);
+#endif
+		*pTime = (time_t)(*pEpochSecs - 14400);
+	}
+	return APP_OK;
 }
 
 void Error_Handler(void)

@@ -58,6 +58,41 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
 }
 
 /**
+ * @brief SPI MSP Initialization
+ *
+ * @param hspi: SPI handle pointer
+ */
+void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	if (hspi->Instance == SPI3)
+	{
+		/* Peripheral clock enable */
+    __HAL_RCC_SPI3_CLK_ENABLE();
+
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    /**SPI3 GPIO Configuration
+    PC1     ------> SPI3_MOSI
+    PC10     ------> SPI3_SCK
+    PC11     ------> SPI3_MISO
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI3;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+	}
+}
+
+/**
  * @brief RTC MSP Initialization
  *
  * @param hrtc RTC handle pointer
