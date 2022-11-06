@@ -1,25 +1,13 @@
-Building the Project
-***************
-1. Install west
+# Building the Project
 
-pip install west
+1. Install west ```pip install west```
 
-2. Initialize
+2. Initialize ```west init```
 
-west init
+3. Update west ```west update```
 
-3. Update west
+4. Install espressif specific dependencies ```west blobs fetch hal_espressif```
 
-west update
+5. Build the project ```west build -b esp32 sntp_time```
 
-4. Install espressif specific dependencies
-
-west blobs fetch hal_espressif
-
-5. Build the project
-
-west build -b esp32 sntp_time
-
-6. Flash to the ESP32 hardware
-
-west flash --esp-device COM4
+6. Flash to the ESP32 hardware ```west flash --esp-device COM4```
