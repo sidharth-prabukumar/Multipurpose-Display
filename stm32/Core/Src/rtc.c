@@ -77,7 +77,7 @@ App_StatusTypeDef RTC_SetDateTime(RTC_TimeTypeDef *pTime, RTC_DateTypeDef *pDate
 	{
 		return APP_ERROR;
 	}
-	HAL_RTC_DST_Sub1Hour(&hrtc);
+	//HAL_RTC_DST_Sub1Hour(&hrtc);
 	return APP_OK;
 }
 
