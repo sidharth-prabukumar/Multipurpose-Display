@@ -13,10 +13,6 @@
 
 #define SERVER_ADDR "129.6.15.28"
 
-#define WIFI_SSID_NAME "<Your_WiFi_SSID>"
-
-#define WIFI_PASSWORD "<Your_WiFi_Password>"
-
 /* size of stack area used by each thread */
 #define STACKSIZE (2048)
 
@@ -43,9 +39,13 @@ static char dayofweek[7][10] = {"Sunday", "Monday", "Tuesday", "Wednesday",
 
 void connect_sntp()
 {
-	wifi_config_t wifi_config;
-	strcpy(wifi_config.sta.ssid, WIFI_SSID_NAME);
-	strcpy(wifi_config.sta.password, WIFI_PASSWORD);
+	wifi_config_t wifi_config = {
+		.sta =
+			{
+				.ssid = "<Your_WiFi_SSID>",
+				.password = "<Your_WiFi_Password>",
+			},
+	};
 
 	esp_err_t ret = esp_wifi_set_mode(ESP32_WIFI_MODE_STA);
 
