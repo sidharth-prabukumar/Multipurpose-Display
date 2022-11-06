@@ -1,4 +1,4 @@
-#Building the Project
+# Building the Project
 
 1. Install west ```pip install west```
 
