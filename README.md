@@ -1,4 +1,4 @@
-# Time and Temperature on LCD
+# Multipurpose LCD Display
 
 This is a study project implemented to understand the RTC and LCD interfaces through an STM32 based ARM board.
 
