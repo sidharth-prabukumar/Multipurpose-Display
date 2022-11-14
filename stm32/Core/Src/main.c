@@ -112,7 +112,7 @@ int main(void)
 	currTime.Minutes 	= (uint8_t)(tp->tm_min);
 	currTime.Seconds 	= (uint8_t)(tp->tm_sec);
 
-	currDate.WeekDay 	= (uint8_t)(tp->tm_wday + 1);	/* Weekday in tm goes from 0-6. RTC struct expects 1-7 */
+	currDate.WeekDay 	= (uint8_t)((tp->tm_wday == 0) ? RTC_WEEKDAY_SUNDAY :  tp->tm_wday);	/* Weekday in tm goes from 0-6. RTC struct expects 1-7 */
 	currDate.Month 		= (uint8_t)(tp->tm_mon + 1);	/* Month in tm goes from 0-11. RTC struct expects 1-12 */
 	currDate.Date 		= (uint8_t)(tp->tm_mday);
 	currDate.Year 		= (uint8_t)(tp->tm_year - 100); /* (1900 + tp->tm_year - 2000) */
