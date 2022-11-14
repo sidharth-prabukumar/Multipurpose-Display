@@ -18,5 +18,6 @@ To display Current Date, Time and the ambient temperature on the LCD screen.
 ![image](https://user-images.githubusercontent.com/52084290/201549869-12f7b240-5bd5-4425-b8a3-8f1fb4deec5f.png)
 
 ## Prototype:
-![unnamed](https://user-images.githubusercontent.com/52084290/201550085-ffc3f42f-f98a-49af-83dd-899ac01af1f4.jpg)
+![unnamed (1)](https://user-images.githubusercontent.com/52084290/201553292-790fbf53-b1ed-496e-ade1-8edf57984967.jpg)
+
 
